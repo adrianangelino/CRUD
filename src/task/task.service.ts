@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Task } from 'generated/prisma';
+import { DEFAULT_METHOD_KEY } from '@nestjs/common/module-utils/constants';
 
 
 @Injectable()
@@ -29,7 +30,7 @@ export class TaskService {
   async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task>{
     const {title, description} = dto
 
-    const atualizar = await this.prisma.task.findUnique({ where: { id } } )
+    const atualizar = await this.prisma.task.findUnique( { where: { id } } )
     if(!atualizar){
       throw new BadRequestException('Não foi possivel atualizar a task')
     }
@@ -39,6 +40,19 @@ export class TaskService {
       data: { title, description }
     })
   }
+
+  async deletarTask(id: number): Promise<Task>{
+    
+    const deletar = await this.prisma.task.findUnique( { where: { id } } )
+    if(!deletar){
+      throw new BadRequestException('Não foi possivel deletar a task');
+    }
+
+    return this.prisma.task.delete({
+      where: { id }
+    })
+  }
+  
 
   // findOne(id: number) {
   //   return `This action returns a #${id} task`;

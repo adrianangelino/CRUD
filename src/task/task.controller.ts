@@ -22,8 +22,9 @@ export class TaskController {
   async atualizarTask(@Param('id') id: string, @Body() dto: CreateTaskDto): Promise<Task>{
     return this.taskService.atualizarTask(Number(id), dto)
   }
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.taskService.remove(+id);
-  // }
+
+  @Delete(':id')
+  async deletarTask(@Param('id') id: string): Promise<Task>{
+    return this.taskService.deletarTask(Number(id))
+  }
 }

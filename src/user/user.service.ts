@@ -45,7 +45,7 @@ export class UserService {
     });
   }
 
-  async ExcluirUsuario(id: number, dto: UserData): Promise<User>{
+  async ExcluirUsuario(id: number): Promise<User>{
 
     const excluir = await this.prisma.user.findUnique( { where: { id } } )
     if(!excluir){

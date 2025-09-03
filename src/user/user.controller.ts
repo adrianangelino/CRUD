@@ -24,8 +24,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  async ExcluirUsuario(@Param('id') id: string, @Body() dto: UserData): Promise<User>{
-    return this.userService.ExcluirUsuario(Number(id), dto);
+  async ExcluirUsuario(@Param('id') id: string): Promise<User>{
+    return this.userService.ExcluirUsuario(Number(id));
   }
   // @Get(':id')
   // findOne(@Param('id') id: string) {
