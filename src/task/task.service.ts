@@ -2,8 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Task } from 'generated/prisma';
-import { DEFAULT_METHOD_KEY } from '@nestjs/common/module-utils/constants';
-
 
 @Injectable()
 export class TaskService {
