@@ -21,34 +21,36 @@ export class TaskService {
   }
 
   async buscarTask(id: number){
-      return this.prisma.task.findUnique( { where: {id } } )
+      return this.prisma.task.findUnique( { where: { id } } )
 
   }
 
   async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task>{
-    const {title, description} = dto
+    const { title, description, completed, email } = dto;
 
-    const atualizar = await this.prisma.task.findUnique( { where: { id } } )
-    if(!atualizar){
-      throw new BadRequestException('Não foi possivel atualizar a task')
+    const VerificaUsuario = await this.prisma.user.findUnique( { where: { email } } );
+    if(!VerificaUsuario) {
+      throw new BadRequestException('Usuário não encontrado');
+    }
+
+    const Verificatask = await this.prisma.task.findUnique( { where: { id } } );
+    if(!Verificatask){
+      throw new BadRequestException('Task não encontrada ou inexistente');
     }
 
     return this.prisma.task.update({
       where: { id },
-      data: { title, description }
+        data: {
+          title,
+          description,
+          completed,
+          userId: VerificaUsuario.id,
+        }
     })
   }
 
-  async deletarTask(id: number): Promise<Task>{
-    
-    const deletar = await this.prisma.task.findUnique( { where: { id } } )
-    if(!deletar){
-      throw new BadRequestException('Não foi possivel deletar a task');
-    }
-
-    return this.prisma.task.delete({
-      where: { id }
-    })
+  async deletarTask(id: number){
+     return this.prisma.task.delete( { where: { id } } )
   }
   
 

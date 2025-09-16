@@ -1,5 +1,6 @@
 export class CreateTaskDto {
     title: string;
     description: string;
-    completed: Boolean;
+    completed: boolean;
+    email?: string
 }
