@@ -8,7 +8,7 @@ export class TaskService {
   constructor(private prisma: PrismaService){}
 
   async criarTask(id: number, dto: CreateTaskDto): Promise<Task>{
-    const { title, description } = dto
+    const { title, description, status} = dto
 
     const taskCriada = await this.prisma.task.findUnique( { where: { id } } )
     if(taskCriada){
@@ -16,7 +16,7 @@ export class TaskService {
     }
 
     return this.prisma.task.create({
-      data: { title, description}
+      data: { title, description, status}
     });
   }
 
@@ -53,16 +53,4 @@ export class TaskService {
      return this.prisma.task.delete( { where: { id } } )
   }
   
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} task`;
-  // }
-
-  // update(id: number, updateTaskDto: UpdateTaskDto) {
-  //   return `This action updates a #${id} task`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} task`;
-  // }
 }

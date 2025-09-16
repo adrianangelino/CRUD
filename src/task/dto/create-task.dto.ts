@@ -3,4 +3,5 @@ export class CreateTaskDto {
     description: string;
     completed: boolean;
     email?: string
+    status: string
 }
