@@ -5,52 +5,52 @@ import { Task } from 'generated/prisma';
 
 @Injectable()
 export class TaskService {
-  constructor(private prisma: PrismaService){}
+  constructor(private prisma: PrismaService) {}
 
-  async criarTask(id: number, dto: CreateTaskDto): Promise<Task>{
-    const { title, description, status} = dto
+  async criarTask(id: number, dto: CreateTaskDto): Promise<Task> {
+    const { title, description, status } = dto;
 
-    const taskCriada = await this.prisma.task.findUnique( { where: { id } } )
-    if(taskCriada){
-      throw new BadRequestException('Tarefa já existente')
+    const taskCriada = await this.prisma.task.findUnique({ where: { id } });
+    if (taskCriada) {
+      throw new BadRequestException('Tarefa já existente');
     }
 
     return this.prisma.task.create({
-      data: { title, description, status}
+      data: { title, description, status },
     });
   }
 
-  async buscarTask(id: number){
-      return this.prisma.task.findUnique( { where: { id } } )
-
+  async buscarTask(id: number) {
+    return this.prisma.task.findUnique({ where: { id } });
   }
 
-  async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task>{
+  async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task> {
     const { title, description, completed, email } = dto;
 
-    const VerificaUsuario = await this.prisma.user.findUnique( { where: { email } } );
-    if(!VerificaUsuario) {
+    const VerificaUsuario = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (!VerificaUsuario) {
       throw new BadRequestException('Usuário não encontrado');
     }
 
-    const Verificatask = await this.prisma.task.findUnique( { where: { id } } );
-    if(!Verificatask){
+    const Verificatask = await this.prisma.task.findUnique({ where: { id } });
+    if (!Verificatask) {
       throw new BadRequestException('Task não encontrada ou inexistente');
     }
 
     return this.prisma.task.update({
       where: { id },
-        data: {
-          title,
-          description,
-          completed,
-          userId: VerificaUsuario.id,
-        }
-    })
+      data: {
+        title,
+        description,
+        completed,
+        userId: VerificaUsuario.id,
+      },
+    });
   }
 
-  async deletarTask(id: number){
-     return this.prisma.task.delete( { where: { id } } )
+  async deletarTask(id: number) {
+    return this.prisma.task.delete({ where: { id } });
   }
-  
 }
