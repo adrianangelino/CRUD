@@ -1,7 +1,7 @@
 export class CreateTaskDto {
-    title: string;
-    description: string;
-    completed: boolean;
-    email?: string
-    status: string
+  title: string;
+  description: string;
+  completed: boolean;
+  email?: string;
+  status: string;
 }

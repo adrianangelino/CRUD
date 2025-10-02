@@ -10,11 +10,6 @@ export class TaskService {
   async criarTask(id: number, dto: CreateTaskDto): Promise<Task> {
     const { title, description, status } = dto;
 
-    const taskCriada = await this.prisma.task.findUnique({ where: { id } });
-    if (taskCriada) {
-      throw new BadRequestException('Tarefa já existente');
-    }
-
     return this.prisma.task.create({
       data: { title, description, status },
     });
@@ -25,7 +20,8 @@ export class TaskService {
   }
 
   async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task> {
-    const { title, description, completed, email } = dto;
+    const { title, description, completed, email, status } = dto;
+    let statusTarefa = status;
 
     const VerificaUsuario = await this.prisma.user.findUnique({
       where: { email },
@@ -39,12 +35,19 @@ export class TaskService {
       throw new BadRequestException('Task não encontrada ou inexistente');
     }
 
+    if (completed === true) {
+      statusTarefa = 'completed';
+    } else {
+      statusTarefa = 'pending';
+    }
+
     return this.prisma.task.update({
       where: { id },
       data: {
         title,
         description,
         completed,
+        status: statusTarefa,
         userId: VerificaUsuario.id,
       },
     });
