@@ -7,6 +7,7 @@ import {
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Task } from 'generated/prisma';
+import { TaskStatus } from './enum/task-status';
 
 @Injectable()
 export class TaskService {
@@ -42,9 +43,12 @@ export class TaskService {
       }
 
       if (completed === true) {
-        statusTarefa = 'completed';
-      } else {
-        statusTarefa = 'pending';
+        statusTarefa = TaskStatus.COMPLETED;
+      }
+
+      const validStatuses = Object.values(TaskStatus);
+      if (statusTarefa && !validStatuses.includes(statusTarefa)) {
+        throw new BadRequestException('Status informado incorreto');
       }
 
       return this.prisma.task.update({
@@ -58,10 +62,13 @@ export class TaskService {
         },
       });
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao buscar tarefa');
+      throw new InternalServerErrorException('Erro ao atualizar tarefa');
     }
   }
 
