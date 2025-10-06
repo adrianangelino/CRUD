@@ -11,6 +11,7 @@ import {
 import { UserService } from './user.service';
 import { UserData } from './dto/create-user.dto';
 import { User } from 'generated/prisma';
+import { UpdateUserData } from './dto/atualizar-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -29,7 +30,7 @@ export class UserController {
   @Patch(':id')
   async atualizarUsuario(
     @Param('id') id: string,
-    @Body() dto: UserData,
+    @Body() dto: UpdateUserData,
   ): Promise<User> {
     return this.userService.atualizarUsuario(Number(id), dto);
   }
