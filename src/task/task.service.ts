@@ -13,12 +13,20 @@ import { TaskStatus } from './enum/task-status';
 export class TaskService {
   constructor(private prisma: PrismaService) {}
 
-  async criarTask(dto: CreateTaskDto): Promise<Task> {
-    const { title, description, status } = dto;
-
-    return this.prisma.task.create({
-      data: { title, description, status },
-    });
+  async criarTask(dto: CreateTaskDto) {
+    let userId: number | undefined;
+    if (dto.email) {
+      const user = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
+      if (!user) {
+        throw new BadRequestException('Usuário não encontrado');
+      }
+      userId = user.id;
+      return this.prisma.task.create({
+        data: { ...dto, userId },
+      });
+    }
   }
 
   async buscarTask(id: number) {
@@ -26,12 +34,13 @@ export class TaskService {
   }
 
   async atualizarTask(id: number, dto: CreateTaskDto): Promise<Task> {
-    const { title, description, completed, email, status } = dto;
-    let statusTarefa = status;
-
     try {
+      if (!dto.email) {
+        throw new BadRequestException('Email do usuário é obrigatório');
+      }
+
       const VerificaUsuario = await this.prisma.user.findUnique({
-        where: { email },
+        where: { email: dto.email },
       });
       if (!VerificaUsuario) {
         throw new BadRequestException('Usuário não encontrado');
@@ -42,24 +51,20 @@ export class TaskService {
         throw new BadRequestException('Task não encontrada ou inexistente');
       }
 
-      if (completed === true) {
+      let statusTarefa: TaskStatus = dto.status;
+
+      if (dto.completed === true) {
         statusTarefa = TaskStatus.COMPLETED;
       }
 
-      const validStatuses = Object.values(TaskStatus);
+      const validStatuses = Object.values(TaskStatus) as TaskStatus[];
       if (statusTarefa && !validStatuses.includes(statusTarefa)) {
         throw new BadRequestException('Status informado incorreto');
       }
 
       return this.prisma.task.update({
         where: { id },
-        data: {
-          title,
-          description,
-          completed,
-          status: statusTarefa,
-          userId: VerificaUsuario.id,
-        },
+        data: dto,
       });
     } catch (error) {
       if (

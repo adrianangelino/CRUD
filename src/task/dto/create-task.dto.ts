@@ -5,4 +5,5 @@ export class CreateTaskDto {
   completed?: boolean;
   email?: string;
   status: TaskStatus;
+  usersId: number;
 }
