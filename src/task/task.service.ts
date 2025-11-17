@@ -15,14 +15,18 @@ export class TaskService {
 
   async criarTask(dto: CreateTaskDto) {
     let userId: number | undefined;
+
     if (dto.email) {
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
       });
+
       if (!user) {
         throw new BadRequestException('Usuário não encontrado');
       }
+
       userId = user.id;
+
       return this.prisma.task.create({
         data: { ...dto, userId },
       });

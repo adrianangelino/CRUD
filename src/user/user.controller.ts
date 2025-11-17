@@ -35,7 +35,6 @@ export class UserController implements OnModuleInit {
       value: JSON.stringify(user),
     });
 
-    console.log('✅ Mensagem enviada para Kafka!');
     return user;
   }
 

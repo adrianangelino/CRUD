@@ -1,0 +1,57 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateEventDto } from './dto/create-event.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { updateEventDto } from './dto/update-event.dto';
+import { Events } from 'generated/prisma';
+
+@Injectable()
+export class EventsService {
+  constructor(private prisma: PrismaService) {}
+
+  async createEvent(dto: CreateEventDto): Promise<Events> {
+    return await this.prisma.events.create({
+      data: dto,
+    });
+  }
+
+  // findAll() {
+  //   return `This action returns all events`;
+  // }
+
+  async getEventById(id: number) {
+    const event = await this.prisma.events.findUnique({
+      where: { id },
+    });
+
+    if (!event) {
+      throw new BadRequestException('Inexistente');
+    }
+
+    if (new Date(event.startDate) < new Date()) {
+      throw new BadRequestException('Evento Expirado');
+    }
+
+    if (new Date(event.startDate) > new Date()) {
+      throw new BadRequestException('Evento não iniciado');
+    }
+  }
+
+  async updateEvent(id: number, dto: updateEventDto): Promise<Events> {
+    const event = await this.prisma.events.findUnique({
+      where: { id },
+    });
+
+    if (!event) {
+      throw new BadRequestException('Evento inexistente');
+    }
+
+    return await this.prisma.events.update({
+      where: { id },
+      data: dto,
+    });
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} event`;
+  }
+}
