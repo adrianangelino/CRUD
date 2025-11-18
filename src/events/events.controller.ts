@@ -21,11 +21,6 @@ export class EventsController {
     return await this.eventsService.createEvent(dto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.eventsService.findAll();
-  // }
-
   @Get(':id')
   async getEventById(@Param('id') id: string) {
     return await this.eventsService.getEventById(Number(id));

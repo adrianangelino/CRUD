@@ -14,10 +14,6 @@ export class EventsService {
     });
   }
 
-  // findAll() {
-  //   return `This action returns all events`;
-  // }
-
   async getEventById(id: number): Promise<Events> {
     const event = await this.prisma.events.findUnique({
       where: { id, deletedAt: null },
