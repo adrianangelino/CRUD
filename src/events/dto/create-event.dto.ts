@@ -1,5 +1,6 @@
 export class CreateEventDto {
   name: string;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
+  deletedAt?: Date;
 }

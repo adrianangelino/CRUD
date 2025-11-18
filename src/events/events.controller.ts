@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Delete,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { updateEventDto } from './dto/update-event.dto';
@@ -31,8 +39,8 @@ export class EventsController {
     return await this.eventsService.updateEvent(Number(id), updateEventDto);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.eventsService.remove(+id);
-  // }
+  @Delete(':id')
+  async softDeletedEvent(@Param('id') id: string): Promise<Events> {
+    return await this.eventsService.softDeletedEvent(Number(id));
+  }
 }
