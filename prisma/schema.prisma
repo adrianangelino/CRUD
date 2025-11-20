@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -39,8 +39,9 @@ model Events {
 }
 
 model Ticket {
-  id   Int    @id @default(autoincrement())
+  id   Int     @id @default(autoincrement())
   name String
+  hash String?
 
   eventId Int
   event   Events @relation(fields: [eventId], references: [id])
