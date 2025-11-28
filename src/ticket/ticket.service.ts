@@ -1,11 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { Ticket } from 'generated/prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TicketService {
-  create(createTicketDto: CreateTicketDto) {
-    return 'This action adds a new ticket';
+  constructor(private prisma: PrismaService) {}
+
+  async createTicket(dto: CreateTicketDto): Promise<Ticket> {
+    const eventExinsting = await this.prisma.events.findUnique({
+      where: { id: dto.eventId, deletedAt: null },
+    });
+
+    const userExisting = await this.prisma.events.findUnique({
+      where: { id: dto.userId, deletedAt: null },
+    });
+
+    if (!eventExinsting || !userExisting) {
+      throw new BadRequestException('Evento inexistente');
+    }
+
+    return await this.prisma.ticket.create({
+      data: {
+        eventId: dto.eventId,
+        userId: dto.userId,
+        name: dto.name,
+      },
+    });
   }
 
   findAll() {
@@ -16,9 +37,9 @@ export class TicketService {
     return `This action returns a #${id} ticket`;
   }
 
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
-  }
+  // update(id: number, updateTicketDto: UpdateTicketDto) {
+  //   return `This action updates a #${id} ticket`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} ticket`;
