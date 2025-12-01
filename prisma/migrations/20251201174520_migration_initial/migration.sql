@@ -9,20 +9,6 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Task" (
-    "id" SERIAL NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT,
-    "completed" BOOLEAN,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "userId" INTEGER,
-    "status" TEXT NOT NULL DEFAULT 'pending',
-
-    CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Events" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
