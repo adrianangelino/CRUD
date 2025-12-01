@@ -7,11 +7,11 @@ function isUser(obj: unknown): obj is User {
     typeof obj === 'object' &&
     obj !== null &&
     'id' in obj &&
-    typeof (obj as any).id === 'number' &&
+    typeof (obj as Record<string, unknown>).id === 'number' &&
     'name' in obj &&
-    typeof (obj as any).name === 'string' &&
+    typeof (obj as Record<string, unknown>).name === 'string' &&
     'email' in obj &&
-    typeof (obj as any).email === 'string'
+    typeof (obj as Record<string, unknown>).email === 'string'
   );
 }
 
