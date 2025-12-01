@@ -10,7 +10,7 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { updateEventDto } from './dto/update-event.dto';
-import type { Events } from 'generated/prisma';
+import { Events } from '@prisma/client';
 
 @Controller('events')
 export class EventsController {

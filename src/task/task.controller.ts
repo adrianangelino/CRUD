@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Task } from 'generated/prisma';
+import { Task } from '@prisma/client';
 
 @Controller('task')
 export class TaskController {

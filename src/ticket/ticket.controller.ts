@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
-import { Ticket } from 'generated/prisma';
+import { Ticket } from '@prisma/client';
 
 @Controller('ticket')
 export class TicketController {

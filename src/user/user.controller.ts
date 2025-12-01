@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserData } from './dto/create-user.dto';
-import { User } from 'generated/prisma';
+import { User } from '@prisma/client';
 import { UpdateUserData } from './dto/atualizar-user.dto';
 import { ClientKafka } from '@nestjs/microservices';
 
