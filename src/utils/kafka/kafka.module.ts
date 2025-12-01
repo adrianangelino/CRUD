@@ -10,10 +10,10 @@ import { UserConsumer } from './userConsumer';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: ['172.17.0.1:9092'],
+            brokers: [],
           },
           consumer: {
-            groupId: 'user-consumer',
+            groupId: '',
           },
         },
       },

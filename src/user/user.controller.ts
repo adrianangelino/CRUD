@@ -7,8 +7,8 @@ import {
   Param,
   Delete,
   Query,
-  Inject,
-  OnModuleInit,
+  // Inject,
+  // OnModuleInit,
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -17,19 +17,18 @@ import { UserService } from './user.service';
 import { UserData } from './dto/create-user.dto';
 import { User } from '@prisma/client';
 import { UpdateUserData } from './dto/atualizar-user.dto';
-import { ClientKafka } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
-export class UserController implements OnModuleInit {
+export class UserController {
   constructor(
     private readonly userService: UserService,
-    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+    // @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
-  async onModuleInit() {
-    await this.kafkaClient.connect();
-  }
+  // async onModuleInit() {
+  //   await this.kafkaClient.connect();
+  // }
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
@@ -50,9 +49,9 @@ export class UserController implements OnModuleInit {
   async criarUsuario(@Body() dto: UserData): Promise<User> {
     const user = await this.userService.criarUsuario(dto);
 
-    this.kafkaClient.emit('usuario.criado', {
-      value: JSON.stringify(user),
-    });
+    // this.kafkaClient.emit('usuario.criado', {
+    //   value: JSON.stringify(user),
+    // });
 
     return user;
   }

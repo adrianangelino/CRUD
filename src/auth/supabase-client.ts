@@ -7,8 +7,6 @@ export function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
-console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
-
 export async function validateSupabaseToken(token: string): Promise<User> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase.auth.getUser(token);
