@@ -12,18 +12,25 @@ export class TicketService {
       where: { id: dto.eventId, deletedAt: null },
     });
 
-    const userExisting = await this.prisma.events.findUnique({
-      where: { id: dto.userId, deletedAt: null },
+    const userExisting = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
     });
 
-    if (!eventExinsting || !userExisting) {
+    if (!eventExinsting) {
       throw new BadRequestException('Evento inexistente');
     }
+
+    if (!userExisting) {
+      throw new BadRequestException('Usuário inexistente');
+    }
+
+    const hash = crypto.randomUUID().toString();
 
     return await this.prisma.ticket.create({
       data: {
         eventId: dto.eventId,
         userId: dto.userId,
+        hash,
         name: dto.name,
       },
     });

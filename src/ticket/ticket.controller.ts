@@ -2,21 +2,26 @@ import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Ticket } from '@prisma/client';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('ticket')
 export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
-  @Post()
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/create-ticket')
   async createTicket(@Body() dto: CreateTicketDto): Promise<Ticket> {
     return await this.ticketService.createTicket(dto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll() {
     return this.ticketService.findAll();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.ticketService.findOne(+id);
@@ -27,6 +32,7 @@ export class TicketController {
   //   return this.ticketService.update(+id, updateTicketDto);
   // }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ticketService.remove(+id);
