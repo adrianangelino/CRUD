@@ -22,15 +22,10 @@ export class TicketController {
     return await this.ticketService.checkTicket(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.ticketService.findAll();
-  }
-
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketService.findOne(+id);
+  async getTicketById(@Param('id') id: string): Promise<Ticket> {
+    return await this.ticketService.getTicketById(Number(id));
   }
 
   // @Patch(':id')

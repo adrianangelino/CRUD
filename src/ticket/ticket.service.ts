@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Ticket } from '@prisma/client';
@@ -52,7 +49,6 @@ export class TicketService {
     const doc = new PDFDocument({ size: 'A6' });
     const buffers: Buffer[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     doc.on('data', (chunk) => buffers.push(chunk));
     const pdfBufferPromise = new Promise<Buffer>((resolve) => {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
@@ -105,12 +101,16 @@ export class TicketService {
     });
   }
 
-  findAll() {
-    return `This action returns all ticket`;
-  }
+  async getTicketById(id: number): Promise<Ticket> {
+    const existingTicket = await this.prisma.ticket.findUnique({
+      where: { id },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} ticket`;
+    if (!existingTicket) {
+      throw new BadRequestException('Ticket inexistente');
+    }
+
+    return existingTicket;
   }
 
   remove(id: number) {
