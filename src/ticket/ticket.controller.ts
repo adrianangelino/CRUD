@@ -4,6 +4,7 @@ import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Ticket } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { CheckTicketDto } from './dto/check-tickt.dto';
 
 @Controller('ticket')
 export class TicketController {
@@ -16,6 +17,11 @@ export class TicketController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Post('/check-ticket')
+  async checkTicket(@Body() dto: CheckTicketDto): Promise<Ticket> {
+    return await this.ticketService.checkTicket(dto);
+  }
+
   @Get()
   findAll() {
     return this.ticketService.findAll();
