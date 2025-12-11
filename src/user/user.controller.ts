@@ -63,7 +63,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':id')
+  @Patch('/atualizarUsuario/:id')
   async atualizarUsuario(
     @Param('id') id: string,
     @Body() dto: UpdateUserData,
@@ -72,7 +72,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':id')
+  @Delete('/ExcluirUsuario/:id')
   async ExcluirUsuario(@Param('id') id: string): Promise<User> {
     return this.userService.ExcluirUsuario(Number(id));
   }

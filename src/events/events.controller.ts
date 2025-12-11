@@ -25,13 +25,13 @@ export class EventsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(':id')
+  @Get('/getEventById/:id')
   async getEventById(@Param('id') id: string) {
     return await this.eventsService.getEventById(Number(id));
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':id')
+  @Patch('/updateEvent/:id')
   async updateEvent(
     @Param('id') id: string,
     @Body() updateEventDto: updateEventDto,
@@ -40,7 +40,7 @@ export class EventsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':id')
+  @Delete('/softDeletedEvent/:id')
   async softDeletedEvent(@Param('id') id: string): Promise<Events> {
     return await this.eventsService.softDeletedEvent(Number(id));
   }
