@@ -23,19 +23,14 @@ export class TicketController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(':id')
+  @Get('/getTicketById/:id')
   async getTicketById(@Param('id') id: string): Promise<Ticket> {
     return await this.ticketService.getTicketById(Number(id));
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-  //   return this.ticketService.update(+id, updateTicketDto);
-  // }
-
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketService.remove(+id);
+  @Delete('/softDeleted/:id')
+  async softDeleted(@Param('id') id: number): Promise<Ticket> {
+    return await this.ticketService.softDeleted(Number(id));
   }
 }

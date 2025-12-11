@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Ticket } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -25,7 +29,7 @@ export class TicketService {
     });
 
     const ticketExisting = await this.prisma.ticket.findFirst({
-      where: { userId: dto.userId, eventId: dto.eventId },
+      where: { userId: dto.userId, eventId: dto.eventId, deletedAt: null },
     });
 
     if (!eventExinsting) {
@@ -113,7 +117,18 @@ export class TicketService {
     return existingTicket;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  async softDeleted(id: number): Promise<Ticket> {
+    const existingTicket = await this.prisma.ticket.findUnique({
+      where: { id },
+    });
+
+    if (!existingTicket) {
+      throw new BadGatewayException('Este ticket não existe');
+    }
+
+    return await this.prisma.ticket.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }

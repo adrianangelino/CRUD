@@ -28,11 +28,12 @@ model Events {
 }
 
 model Ticket {
-  id     Int     @id @default(autoincrement())
-  name   String
-  hash   String? @unique
-  pdfUrl String?
-  status String  @default("pending")
+  id        Int     @id @default(autoincrement())
+  name      String
+  hash      String? @unique
+  pdfUrl    String?
+  status    String  @default("pending")
+  deletedAt DateTime?
 
   eventId Int
   event   Events @relation(fields: [eventId], references: [id])
