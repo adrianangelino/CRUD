@@ -21,7 +21,11 @@ export class TicketService {
 
   async createTicket(dto: CreateTicketDto): Promise<Ticket> {
     const eventExinsting = await this.prisma.events.findUnique({
-      where: { id: dto.eventId, deletedAt: null },
+      where: {
+        id: dto.eventId,
+        deletedAt: null,
+        endDate: dto.endDate,
+      },
     });
 
     const userExisting = await this.prisma.user.findUnique({
@@ -34,6 +38,10 @@ export class TicketService {
 
     if (!eventExinsting) {
       throw new BadRequestException('Evento inexistente');
+    }
+
+    if (eventExinsting.endDate < new Date()) {
+      throw new BadRequestException('Evento Expirado');
     }
 
     if (!userExisting) {
@@ -94,6 +102,22 @@ export class TicketService {
     const ticketExisting = await this.prisma.ticket.findUnique({
       where: { hash: dto.hash },
     });
+
+    const eventExinsting = await this.prisma.events.findUnique({
+      where: {
+        id: dto.eventId,
+        deletedAt: null,
+        endDate: dto.endDate,
+      },
+    });
+
+    if (!eventExinsting) {
+      throw new BadRequestException('Evento inexistente');
+    }
+
+    if (eventExinsting.endDate < new Date()) {
+      throw new BadRequestException('Evento Expirado');
+    }
 
     if (!ticketExisting) {
       throw new BadRequestException('Ticket não encontrado');
