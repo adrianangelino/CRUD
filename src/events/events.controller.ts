@@ -11,22 +11,27 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { updateEventDto } from './dto/update-event.dto';
 import { Events } from '@prisma/client';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/create-events')
   async createEvent(@Body() dto: CreateEventDto): Promise<Events> {
     return await this.eventsService.createEvent(dto);
   }
 
-  @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/getEventById/:id')
   async getEventById(@Param('id') id: string) {
     return await this.eventsService.getEventById(Number(id));
   }
 
-  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/updateEvent/:id')
   async updateEvent(
     @Param('id') id: string,
     @Body() updateEventDto: updateEventDto,
@@ -34,7 +39,8 @@ export class EventsController {
     return await this.eventsService.updateEvent(Number(id), updateEventDto);
   }
 
-  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/softDeletedEvent/:id')
   async softDeletedEvent(@Param('id') id: string): Promise<Events> {
     return await this.eventsService.softDeletedEvent(Number(id));
   }

@@ -12,7 +12,7 @@ import {
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
-import { getSupabaseClient } from '../auth/supabase-client';
+import { getSupabaseClient } from '../utils/auth/supabase-client';
 import { UserService } from './user.service';
 import { UserData } from './dto/create-user.dto';
 import { User } from '@prisma/client';
@@ -56,12 +56,14 @@ export class UserController {
     return user;
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get('buscar-usuario')
   async buscarUsuario(@Query() dto: UserData): Promise<User> {
     return this.userService.buscarUsuario(dto);
   }
 
-  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/atualizarUsuario/:id')
   async atualizarUsuario(
     @Param('id') id: string,
     @Body() dto: UpdateUserData,
@@ -69,7 +71,8 @@ export class UserController {
     return this.userService.atualizarUsuario(Number(id), dto);
   }
 
-  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/ExcluirUsuario/:id')
   async ExcluirUsuario(@Param('id') id: string): Promise<User> {
     return this.userService.ExcluirUsuario(Number(id));
   }
