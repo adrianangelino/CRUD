@@ -20,6 +20,10 @@ export class TicketService {
   ) {}
 
   async createTicket(dto: CreateTicketDto): Promise<Ticket> {
+    const userExisting = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
+    });
+
     const eventExinsting = await this.prisma.events.findUnique({
       where: {
         id: dto.eventId,
@@ -28,13 +32,13 @@ export class TicketService {
       },
     });
 
-    const userExisting = await this.prisma.user.findUnique({
-      where: { id: dto.userId },
-    });
-
     const ticketExisting = await this.prisma.ticket.findFirst({
       where: { userId: dto.userId, eventId: dto.eventId, deletedAt: null },
     });
+
+    if (!userExisting) {
+      throw new BadRequestException('Usuário inexistente');
+    }
 
     if (!eventExinsting) {
       throw new BadRequestException('Evento inexistente');
@@ -42,10 +46,6 @@ export class TicketService {
 
     if (eventExinsting.endDate < new Date()) {
       throw new BadRequestException('Evento Expirado');
-    }
-
-    if (!userExisting) {
-      throw new BadRequestException('Usuário inexistente');
     }
 
     if (ticketExisting) {
@@ -99,25 +99,17 @@ export class TicketService {
   }
 
   async checkTicket(dto: CheckTicketDto): Promise<Ticket> {
-    const ticketExisting = await this.prisma.ticket.findUnique({
-      where: { hash: dto.hash },
+    const ticketExisting = await this.prisma.ticket.findFirst({
+      where: { hash: dto.hash,
+        event: {
+          id: dto.eventId,
+          deletedAt: null,
+          endDate: {
+            gt: new Date(),
+          }
+        }
+       },
     });
-
-    const eventExinsting = await this.prisma.events.findUnique({
-      where: {
-        id: dto.eventId,
-        deletedAt: null,
-        endDate: dto.endDate,
-      },
-    });
-
-    if (!eventExinsting) {
-      throw new BadRequestException('Evento inexistente');
-    }
-
-    if (eventExinsting.endDate < new Date()) {
-      throw new BadRequestException('Evento Expirado');
-    }
 
     if (!ticketExisting) {
       throw new BadRequestException('Ticket não encontrado');
