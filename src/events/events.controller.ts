@@ -13,6 +13,7 @@ import { updateEventDto } from './dto/update-event.dto';
 import { Events } from '@prisma/client';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { promises } from 'dns';
 
 @Controller('events')
 export class EventsController {
@@ -28,6 +29,12 @@ export class EventsController {
   @Get('/getEventById/:id')
   async getEventById(@Param('id') id: string) {
     return await this.eventsService.getEventById(Number(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/getAllEvents')
+  async getAllEvents(): Promise<Events[]> {
+    return await this.eventsService.getAllEvents();
   }
 
   @UseGuards(AuthGuard('jwt'))

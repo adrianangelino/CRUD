@@ -7,8 +7,6 @@ import {
   Param,
   Delete,
   Query,
-  // Inject,
-  // OnModuleInit,
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -21,16 +19,9 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    // @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
-  // async onModuleInit() {
-  //   await this.kafkaClient.connect();
-  // }
-
-  @Post('login')
+  @Post('/login')
   async login(@Body() body: { email: string; password: string }) {
     const { email, password } = body;
     const supabase = getSupabaseClient();
@@ -45,21 +36,22 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('criar-usuario')
+  @Post('/criar-usuario')
   async criarUsuario(@Body() dto: UserData): Promise<User> {
     const user = await this.userService.criarUsuario(dto);
-
-    // this.kafkaClient.emit('usuario.criado', {
-    //   value: JSON.stringify(user),
-    // });
-
     return user;
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('buscar-usuario')
+  @Get('/buscar-usuario')
   async buscarUsuario(@Query() dto: UserData): Promise<User> {
     return this.userService.buscarUsuario(dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/getAllUsers')
+  async getAllUsers(): Promise<User[]> {
+    return await this.userService.getAllUsers();
   }
 
   @UseGuards(AuthGuard('jwt'))

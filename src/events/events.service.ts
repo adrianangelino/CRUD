@@ -34,6 +34,24 @@ export class EventsService {
     return event;
   }
 
+  async getAllEvents(): Promise<Events[]> {
+    const events = await this.prisma.events.findMany({
+      where: { deletedAt: null },
+    });
+
+    const validEvents = events.filter(
+      (ev) =>
+        new Date(ev.startDate) <= new Date() &&
+        new Date(ev.endDate) >= new Date(),
+    );
+
+    if (validEvents.length === 0) {
+      throw new BadRequestException('Nenhum evento válido');
+    }
+
+    return validEvents;
+  }
+
   async updateEvent(id: number, dto: updateEventDto): Promise<Events> {
     const event = await this.prisma.events.findUnique({
       where: { id },

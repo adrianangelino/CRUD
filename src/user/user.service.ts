@@ -31,6 +31,13 @@ export class UserService {
     return buscar;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    const existingUsers = await this.prisma.user.findMany({
+      where: { deletedAt: null },
+    });
+    return existingUsers;
+  }
+
   async atualizarUsuario(id: number, dto: UserData): Promise<User> {
     const atualizar = await this.prisma.user.findUnique({ where: { id } });
     if (!atualizar) {
