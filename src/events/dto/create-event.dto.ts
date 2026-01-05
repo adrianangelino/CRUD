@@ -3,4 +3,7 @@ export class CreateEventDto {
   startDate: Date;
   endDate: Date;
   deletedAt?: Date;
+  companyId: number;
+  quantity: number;
+  ticketTypeId: number;
 }

@@ -4,4 +4,8 @@ export class CreateTicketDto {
   eventId: number;
   userId: number;
   endDate: Date;
+  companyId: number;
+  price: number;
+  deadline: Date;
+  ticketTypeId: number;
 }

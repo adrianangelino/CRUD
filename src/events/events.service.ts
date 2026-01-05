@@ -2,15 +2,27 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { updateEventDto } from './dto/update-event.dto';
+import { UserService } from '../user/user.service';
 import { Events } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    public readonly userService: UserService,
+  ) {}
 
   async createEvent(dto: CreateEventDto): Promise<Events> {
     return await this.prisma.events.create({
-      data: dto,
+      data: {
+        name: dto.name,
+        startDate: dto.startDate,
+        endDate: dto.endDate,
+        deletedAt: dto.deletedAt,
+        quantity: dto.quantity,
+        ticketTypeId: dto.ticketTypeId,
+        companyId: dto.companyId, 
+      },
     });
   }
 
@@ -34,9 +46,9 @@ export class EventsService {
     return event;
   }
 
-  async getAllEvents(): Promise<Events[]> {
+  async getAllEvents(companyId: number): Promise<Events[]> {
     const events = await this.prisma.events.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, companyId },
     });
 
     const validEvents = events.filter(

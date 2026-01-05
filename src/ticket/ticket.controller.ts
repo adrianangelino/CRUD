@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Ticket } from '@prisma/client';
@@ -31,8 +40,12 @@ export class TicketController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/getAlltickets')
-  async getAlltickets(): Promise<Ticket[]> {
-    return await this.ticketService.getAlllticket();
+  async getAlltickets(@Request() req): Promise<Ticket[]> {
+    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(req.user.email);
+    if (!userDb) {
+      throw new Error('Usuário não encontrado');
+    }
+    return await this.ticketService.getAlllticket(userDb.companyId);
   }
 
   @UseGuards(AuthGuard('jwt'))

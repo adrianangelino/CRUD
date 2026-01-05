@@ -8,6 +8,7 @@ import { getTicketUser } from './dto/get-ticket-user';
 import { Ticket } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SupabaseStorageService } from '../utils/supabase-storage/supabase-storage.service';
+import { UserService } from '../user/user.service';
 import { CheckTicketDto } from './dto/check-tickt.dto';
 import PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
@@ -18,6 +19,7 @@ export class TicketService {
   constructor(
     private prisma: PrismaService,
     private supabaseStorage: SupabaseStorageService,
+    public readonly userService: UserService,
   ) {}
 
   async createTicket(dto: CreateTicketDto): Promise<Ticket> {
@@ -95,6 +97,8 @@ export class TicketService {
         hash,
         name: dto.name,
         pdfUrl,
+        companyId: dto.companyId,
+        ticketTypeId: dto.ticketTypeId,
       },
     });
   }
@@ -134,10 +138,10 @@ export class TicketService {
     return existingTicket;
   }
 
-  async getAlllticket(): Promise <Ticket[]>{
+  async getAlllticket(companyId: number): Promise<Ticket[]> {
     return await this.prisma.ticket.findMany({
-      where: { deletedAt: null }
-    })
+      where: { deletedAt: null, companyId },
+    });
   }
 
   async softDeleted(id: number): Promise<Ticket> {

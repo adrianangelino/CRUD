@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   UnauthorizedException,
+  Request,
 } from '@nestjs/common';
 import { getSupabaseClient } from '../utils/auth/supabase-client';
 import { UserService } from './user.service';
@@ -35,7 +36,7 @@ export class UserController {
     return { access_token: data.session.access_token, user: data.user };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   @Post('/criar-usuario')
   async criarUsuario(@Body() dto: UserData): Promise<User> {
     const user = await this.userService.criarUsuario(dto);
@@ -50,8 +51,8 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/getAllUsers')
-  async getAllUsers(): Promise<User[]> {
-    return await this.userService.getAllUsers();
+  async getAllUsers(@Request() req): Promise<User[]> {
+    return await this.userService.getAllUsers(req.user.companyId);
   }
 
   @UseGuards(AuthGuard('jwt'))
