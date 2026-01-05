@@ -52,7 +52,11 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Get('/getAllUsers')
   async getAllUsers(@Request() req): Promise<User[]> {
-    return await this.userService.getAllUsers(req.user.companyId);
+    const userDb = await this.userService.buscarUsuarioPorEmail(req.user.email);
+    if (!userDb) {
+      throw new UnauthorizedException('Usuário não encontrado');
+    }
+    return await this.userService.getAllUsers(userDb.companyId);
   }
 
   @UseGuards(AuthGuard('jwt'))
