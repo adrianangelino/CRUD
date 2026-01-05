@@ -23,7 +23,17 @@ export class TicketController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/create-ticket')
   async createTicket(@Body() dto: CreateTicketDto): Promise<Ticket> {
-    return await this.ticketService.createTicket(dto);
+    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(
+      (dto.email || '').trim(),
+    );
+    if (!userDb) {
+      throw new Error('Usuário não encontrado');
+    }
+    return await this.ticketService.createTicket(
+      dto,
+      userDb.id,
+      userDb.companyId,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -41,7 +51,9 @@ export class TicketController {
   @UseGuards(AuthGuard('jwt'))
   @Get('/getAlltickets')
   async getAlltickets(@Request() req): Promise<Ticket[]> {
-    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(req.user.email);
+    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(
+      req.user.email,
+    );
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }

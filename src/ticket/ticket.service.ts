@@ -22,82 +22,81 @@ export class TicketService {
     public readonly userService: UserService,
   ) {}
 
-  async createTicket(dto: CreateTicketDto): Promise<Ticket> {
-    const userExisting = await this.prisma.user.findFirst({
-      where: { id: dto.userId },
+  async createTicket(dto: CreateTicketDto, userId: number, companyId: number): Promise<Ticket> {
+    // Busca o ticketType para validar o limite
+    const ticketType = await this.prisma.ticketType.findUnique({
+      where: { id: dto.ticketTypeId },
+    });
+    if (!ticketType) {
+      throw new BadRequestException('Tipo de ticket inexistente');
+    }
+    
+    const count = await this.prisma.ticket.count({
+      where: { ticketTypeId: dto.ticketTypeId, deletedAt: null },
     });
 
+    if (count >= ticketType.quantity) {
+      throw new BadRequestException('Limite de tickets para este tipo atingido');
+    }
+
+    // Busca usuário e evento normalmente
+    const userExisting = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
     const eventExinsting = await this.prisma.events.findUnique({
       where: {
         id: dto.eventId,
         deletedAt: null,
-        endDate: dto.endDate,
       },
     });
-
     const ticketExisting = await this.prisma.ticket.findFirst({
-      where: { userId: dto.userId, eventId: dto.eventId, deletedAt: null },
+      where: { userId, eventId: dto.eventId, deletedAt: null },
     });
-
     if (!userExisting) {
       throw new BadRequestException('Usuário inexistente');
     }
-
     if (!eventExinsting) {
       throw new BadRequestException('Evento inexistente');
     }
-
     if (eventExinsting.endDate < new Date()) {
       throw new BadRequestException('Evento Expirado');
     }
-
     if (ticketExisting) {
-      throw new BadRequestException(
-        'Esse usuário já possui um ticket para este evento',
-      );
+      throw new BadRequestException('Esse usuário já possui um ticket para este evento');
     }
 
     const hash = crypto.randomUUID();
-
     const qrCodeDataUrl: string = await QRCode.toDataURL(hash);
-
     const doc = new PDFDocument({ size: 'A6' });
     const buffers: Buffer[] = [];
-
     doc.on('data', (chunk) => buffers.push(chunk));
     const pdfBufferPromise = new Promise<Buffer>((resolve) => {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
     });
-
     doc.image(qrCodeDataUrl, doc.page.width / 2 - 85, 80, {
       fit: [170, 170],
       align: 'center',
     });
-
     doc.moveDown(2);
     doc.fontSize(22);
     const textWidth = doc.widthOfString(dto.name);
     const x = (doc.page.width - textWidth) / 2;
     doc.text(dto.name, x, 270);
-
     doc.end();
-
     const pdfBuffer = await pdfBufferPromise;
-
     const pdfUrl = await this.supabaseStorage.uploadTicketOfPdf(
       'ticket',
       `${hash}.pdf`,
       pdfBuffer,
     );
-
     return await this.prisma.ticket.create({
       data: {
         eventId: dto.eventId,
-        userId: dto.userId,
+        userId,
         hash,
         name: dto.name,
         pdfUrl,
-        companyId: dto.companyId,
+        companyId,
         ticketTypeId: dto.ticketTypeId,
       },
     });
