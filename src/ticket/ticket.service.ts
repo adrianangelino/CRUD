@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
+import { getTicketUser } from './dto/get-ticket-user';
 import { Ticket } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SupabaseStorageService } from '../utils/supabase-storage/supabase-storage.service';
@@ -20,7 +21,7 @@ export class TicketService {
   ) {}
 
   async createTicket(dto: CreateTicketDto): Promise<Ticket> {
-    const userExisting = await this.prisma.user.findUnique({
+    const userExisting = await this.prisma.user.findFirst({
       where: { id: dto.userId },
     });
 
@@ -121,9 +122,9 @@ export class TicketService {
     });
   }
 
-  async getTicketById(id: number): Promise<Ticket> {
-    const existingTicket = await this.prisma.ticket.findUnique({
-      where: { id },
+  async getTicketUser(dto: getTicketUser): Promise<Ticket> {
+    const existingTicket = await this.prisma.ticket.findFirst({
+      where: { name: dto.name },
     });
 
     if (!existingTicket) {
@@ -131,6 +132,12 @@ export class TicketService {
     }
 
     return existingTicket;
+  }
+
+  async getAlllticket(): Promise <Ticket[]>{
+    return await this.prisma.ticket.findMany({
+      where: { deletedAt: null }
+    })
   }
 
   async softDeleted(id: number): Promise<Ticket> {
