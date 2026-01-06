@@ -73,6 +73,7 @@ model Ticket {
   pdfUrl       String?
   status       String     @default("pending")
   deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
   eventId      Int
   event        Events     @relation(fields: [eventId], references: [id])
   userId       Int
