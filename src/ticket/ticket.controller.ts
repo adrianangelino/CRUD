@@ -61,6 +61,20 @@ export class TicketController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('/event-ticket-summaries')
+  async getAllEventTicketSummaries(@Request() req) {
+    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(
+      req.user.email,
+    );
+    if (!userDb) {
+      throw new Error('Usuário não encontrado');
+    }
+    return await this.ticketService.getAllEventTicketSummaries(
+      userDb.companyId,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Delete('/softDeleted/:id')
   async softDeleted(@Param('id') id: number): Promise<Ticket> {
     return await this.ticketService.softDeleted(Number(id));
