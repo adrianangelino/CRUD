@@ -55,6 +55,7 @@ export class UserService {
   async getAllUsers(companyId: number): Promise<User[]> {
     const existingUsers = await this.prisma.user.findMany({
       where: { deletedAt: null, companyId },
+      include: { role: true },
     });
     return existingUsers;
   }
