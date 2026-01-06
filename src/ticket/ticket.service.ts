@@ -22,7 +22,11 @@ export class TicketService {
     public readonly userService: UserService,
   ) {}
 
-  async createTicket(dto: CreateTicketDto, userId: number, companyId: number): Promise<Ticket> {
+  async createTicket(
+    dto: CreateTicketDto,
+    userId: number,
+    companyId: number,
+  ): Promise<Ticket> {
     // Busca o ticketType para validar o limite
     const ticketType = await this.prisma.ticketType.findUnique({
       where: { id: dto.ticketTypeId },
@@ -30,13 +34,15 @@ export class TicketService {
     if (!ticketType) {
       throw new BadRequestException('Tipo de ticket inexistente');
     }
-    
+
     const count = await this.prisma.ticket.count({
       where: { ticketTypeId: dto.ticketTypeId, deletedAt: null },
     });
 
     if (count >= ticketType.quantity) {
-      throw new BadRequestException('Limite de tickets para este tipo atingido');
+      throw new BadRequestException(
+        'Limite de tickets para este tipo atingido',
+      );
     }
 
     // Busca usuário e evento normalmente
@@ -62,7 +68,9 @@ export class TicketService {
       throw new BadRequestException('Evento Expirado');
     }
     if (ticketExisting) {
-      throw new BadRequestException('Esse usuário já possui um ticket para este evento');
+      throw new BadRequestException(
+        'Esse usuário já possui um ticket para este evento',
+      );
     }
 
     const hash = crypto.randomUUID();
@@ -104,15 +112,16 @@ export class TicketService {
 
   async checkTicket(dto: CheckTicketDto): Promise<Ticket> {
     const ticketExisting = await this.prisma.ticket.findFirst({
-      where: { hash: dto.hash,
+      where: {
+        hash: dto.hash,
         event: {
           id: dto.eventId,
           deletedAt: null,
           endDate: {
             gt: new Date(),
-          }
-        }
-       },
+          },
+        },
+      },
     });
 
     if (!ticketExisting) {
@@ -135,6 +144,40 @@ export class TicketService {
     }
 
     return existingTicket;
+  }
+
+  async getAllEventTicketSummaries(companyId: number) {
+    // Busca todos os eventos da company
+    const events = await this.prisma.events.findMany({
+      where: { companyId, deletedAt: null },
+      include: { ticketType: true },
+    });
+    // Para cada evento, calcula o resumo
+    const summaries = await Promise.all(
+      events.map(async (event) => {
+        const totalTickets = await this.prisma.ticket.count({
+          where: { eventId: event.id, companyId, deletedAt: null },
+        });
+        const limit = event.quantity ?? event.ticketType?.quantity ?? 0;
+        const remaining = Math.max(limit - totalTickets, 0);
+        const tickets = await this.prisma.ticket.findMany({
+          where: { eventId: event.id, companyId, deletedAt: null },
+          include: { ticketType: true },
+        });
+        const totalPrice = tickets.reduce(
+          (sum, t) => sum + (t.ticketType?.price ?? 0),
+          0,
+        );
+        return {
+          eventName: event.name,
+          eventId: event.id,
+          totalTickets,
+          remaining,
+          totalPrice,
+        };
+      }),
+    );
+    return summaries;
   }
 
   async getAlllticket(companyId: number): Promise<Ticket[]> {
