@@ -19,9 +19,9 @@ export class EventsService {
         startDate: dto.startDate,
         endDate: dto.endDate,
         deletedAt: dto.deletedAt,
-        quantity: dto.quantity,
         ticketTypeId: dto.ticketTypeId,
-        companyId: dto.companyId, 
+        companyId: dto.companyId,
+        quantity: dto.quantity, // Make sure CreateEventDto has quantity
       },
     });
   }

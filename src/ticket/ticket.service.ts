@@ -158,8 +158,6 @@ export class TicketService {
         const totalTickets = await this.prisma.ticket.count({
           where: { eventId: event.id, companyId, deletedAt: null },
         });
-        const limit = event.quantity ?? event.ticketType?.quantity ?? 0;
-        const remaining = Math.max(limit - totalTickets, 0);
         const tickets = await this.prisma.ticket.findMany({
           where: { eventId: event.id, companyId, deletedAt: null },
           include: { ticketType: true },
@@ -172,7 +170,6 @@ export class TicketService {
           eventName: event.name,
           eventId: event.id,
           totalTickets,
-          remaining,
           totalPrice,
         };
       }),
