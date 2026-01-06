@@ -4,6 +4,5 @@ export class CreateEventDto {
   endDate: Date;
   deletedAt?: Date;
   companyId: number;
-  quantity: number;
   ticketTypeId: number;
 }

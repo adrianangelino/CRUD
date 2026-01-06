@@ -61,7 +61,6 @@ model Events {
   tickets      Ticket[]
   companyId    Int
   company      Company    @relation(fields: [companyId], references: [id])
-  quantity     Int
   ticketTypeId Int
   ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
 }
