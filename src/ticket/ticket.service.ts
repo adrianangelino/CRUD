@@ -136,7 +136,7 @@ export class TicketService {
 
   async getTicketUser(dto: getTicketUser): Promise<Ticket> {
     const existingTicket = await this.prisma.ticket.findFirst({
-      where: { name: dto.name },
+      where: { name: dto.name, deletedAt: null },
     });
 
     if (!existingTicket) {
