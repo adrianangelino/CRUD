@@ -27,6 +27,9 @@ export class TicketTypeController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
+    }
     return await this.ticketTypeService.createTicketType(dto, userDb.companyId);
   }
 
@@ -37,6 +40,9 @@ export class TicketTypeController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
+    }
     return await this.ticketTypeService.getAllTicketType(userDb.companyId);
   }
 
@@ -46,6 +52,9 @@ export class TicketTypeController {
     const userDb = await this.ticketTypeService.userService.buscarUsuarioPorEmail(req.user.email);
     if (!userDb) {
       throw new Error('Usuário não encontrado');
+    }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
     }
     return await this.ticketTypeService.getTickTypeForName(dto, userDb.companyId);
   }
