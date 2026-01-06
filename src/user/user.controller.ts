@@ -33,7 +33,18 @@ export class UserController {
     if (error || !data?.session?.access_token) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
-    return { access_token: data.session.access_token, user: data.user };
+    // Busca o usuário no banco local para pegar o roleId
+    const userDb = await this.userService.buscarUsuarioPorEmail(email);
+    if (!userDb) {
+      throw new UnauthorizedException('Usuário não encontrado no banco local');
+    }
+    return {
+      access_token: data.session.access_token,
+      user: {
+        ...data.user,
+        roleId: userDb.roleId,
+      },
+    };
   }
 
   // @UseGuards(AuthGuard('jwt'))
@@ -55,6 +66,9 @@ export class UserController {
     const userDb = await this.userService.buscarUsuarioPorEmail(req.user.email);
     if (!userDb) {
       throw new UnauthorizedException('Usuário não encontrado');
+    }
+    if (userDb.companyId == null) {
+      throw new UnauthorizedException('Usuário não pertence a nenhuma empresa');
     }
     return await this.userService.getAllUsers(userDb.companyId);
   }

@@ -38,6 +38,9 @@ export class EventsController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
+    }
     return await this.eventsService.getAllEvents(userDb.companyId);
   }
 

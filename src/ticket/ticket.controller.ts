@@ -32,7 +32,9 @@ export class TicketController {
     return await this.ticketService.createTicket(
       dto,
       userDb.id,
-      userDb.companyId,
+      (userDb.companyId != null)
+        ? userDb.companyId
+        : (() => { throw new Error('Usuário não pertence a nenhuma empresa'); })(),
     );
   }
 
@@ -57,6 +59,9 @@ export class TicketController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
+    }
     return await this.ticketService.getAlllticket(userDb.companyId);
   }
 
@@ -68,6 +73,9 @@ export class TicketController {
     );
     if (!userDb) {
       throw new Error('Usuário não encontrado');
+    }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
     }
     return await this.ticketService.getAllEventTicketSummaries(
       userDb.companyId,

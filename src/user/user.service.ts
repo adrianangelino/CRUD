@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserData } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { getSupabaseClient } from '../utils/auth/supabase-client';
 
 @Injectable()
 export class UserService {
@@ -16,7 +17,6 @@ export class UserService {
   }
 
   async criarUsuario(dto: UserData): Promise<User> {
-    // Verifica se já existe no banco local
     const existente = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -25,19 +25,23 @@ export class UserService {
     }
 
     // Cria usuário no Supabase Auth
-    const { getSupabaseClient } = await import('../utils/auth/supabase-client.js');
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: dto.email,
       password: dto.password,
     });
     if (error) {
-      throw new BadRequestException('Erro ao criar usuário no Supabase: ' + error.message);
+      throw new BadRequestException(
+        'Erro ao criar usuário no Supabase: ' + error.message,
+      );
     }
 
     // Cria usuário no banco local
     return this.prisma.user.create({
-      data: dto,
+      data: {
+        ...dto,
+        roleId: dto.roleId ?? 2,
+      },
     });
   }
 
@@ -80,7 +84,7 @@ export class UserService {
 
     return this.prisma.user.update({
       where: { id },
-      data: { deletedAt: new Date() }
+      data: { deletedAt: new Date() },
     });
   }
 }
