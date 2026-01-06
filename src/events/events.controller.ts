@@ -6,6 +6,7 @@ import {
   Delete,
   Patch,
   Param,
+  Request,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -28,6 +29,16 @@ export class EventsController {
   @Get('/getEventById/:id')
   async getEventById(@Param('id') id: string) {
     return await this.eventsService.getEventById(Number(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/getAllEvents')
+  async getAllEvents(@Request() req): Promise<Events[]> {
+    const userDb = await this.eventsService.userService.buscarUsuarioPorEmail(req.user.email);
+    if (!userDb) {
+      throw new Error('Usuário não encontrado');
+    }
+    return await this.eventsService.getAllEvents(userDb.companyId);
   }
 
   @UseGuards(AuthGuard('jwt'))

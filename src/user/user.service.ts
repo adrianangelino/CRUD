@@ -6,8 +6,17 @@ import { User } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+  /**
+   * Busca um usuário pelo email, incluindo o companyId. Retorna null se não encontrado.
+   */
+  async buscarUsuarioPorEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
 
   async criarUsuario(dto: UserData): Promise<User> {
+    // Verifica se já existe no banco local
     const existente = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -15,6 +24,18 @@ export class UserService {
       throw new BadRequestException('Usuário já cadastrado');
     }
 
+    // Cria usuário no Supabase Auth
+    const { getSupabaseClient } = await import('../utils/auth/supabase-client.js');
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
+      email: dto.email,
+      password: dto.password,
+    });
+    if (error) {
+      throw new BadRequestException('Erro ao criar usuário no Supabase: ' + error.message);
+    }
+
+    // Cria usuário no banco local
     return this.prisma.user.create({
       data: dto,
     });
@@ -29,6 +50,13 @@ export class UserService {
     }
 
     return buscar;
+  }
+
+  async getAllUsers(companyId: number): Promise<User[]> {
+    const existingUsers = await this.prisma.user.findMany({
+      where: { deletedAt: null, companyId },
+    });
+    return existingUsers;
   }
 
   async atualizarUsuario(id: number, dto: UserData): Promise<User> {
@@ -49,8 +77,9 @@ export class UserService {
       throw new BadRequestException('Erro ao excluir usuário');
     }
 
-    return this.prisma.user.delete({
+    return this.prisma.user.update({
       where: { id },
+      data: { deletedAt: new Date() }
     });
   }
 }
