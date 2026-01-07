@@ -35,13 +35,27 @@ export class TicketController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
-    if (userDb.companyId == null) {
-      throw new Error('Usuário não pertence a nenhuma empresa');
-    }
     return await this.ticketService.createTicket(
       dto,
       userDb.id,
       userDb.companyId,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/create-ticket-client')
+  async createTicketClient(@Body() dto: CreateTicketDto): Promise<Ticket> {
+    const userDb = await this.ticketService.userService.buscarUsuarioPorEmail(
+      (dto.email || '').trim(),
+    );
+    if (!userDb) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    return await this.ticketService.createTicket(
+      dto,
+      userDb.id,
+      null,
     );
   }
 
