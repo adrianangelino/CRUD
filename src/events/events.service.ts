@@ -69,6 +69,10 @@ export class EventsService {
     });
   }
 
+  async getPublicEvents(): Promise<Events[]> {
+    return this.prisma.events.findMany({ where: { deletedAt: null } });
+  }
+
   async updateEvent(id: number, dto: updateEventDto): Promise<Events> {
     const event = await this.prisma.events.findUnique({
       where: { id },
