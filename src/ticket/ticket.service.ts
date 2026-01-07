@@ -25,7 +25,7 @@ export class TicketService {
   async createTicket(
     dto: CreateTicketDto,
     userId: number,
-    companyId: number,
+    companyId: number | null,
   ): Promise<Ticket> {
     // Busca o ticketType para validar o limite
     const ticketType = await this.prisma.ticketType.findUnique({
@@ -97,16 +97,19 @@ export class TicketService {
       `${hash}.pdf`,
       pdfBuffer,
     );
+    const data: any = {
+      eventId: dto.eventId,
+      userId,
+      hash,
+      name: dto.name,
+      pdfUrl,
+      ticketTypeId: dto.ticketTypeId,
+    };
+    if (companyId !== null) {
+      data.companyId = companyId;
+    }
     return await this.prisma.ticket.create({
-      data: {
-        eventId: dto.eventId,
-        userId,
-        hash,
-        name: dto.name,
-        pdfUrl,
-        companyId,
-        ticketTypeId: dto.ticketTypeId,
-      },
+      data,
     });
   }
 
