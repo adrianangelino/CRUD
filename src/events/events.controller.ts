@@ -65,6 +65,11 @@ export class EventsController {
     return await this.eventsService.getAllEventsForClients();
   }
 
+  @Get('/public-events')
+  async getPublicEvents(): Promise<Events[]> {
+    return await this.eventsService.getPublicEvents();
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Patch('/updateEvent/:id')
   async updateEvent(
