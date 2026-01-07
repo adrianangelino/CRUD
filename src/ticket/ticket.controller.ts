@@ -52,10 +52,11 @@ export class TicketController {
       throw new Error('Usuário não encontrado');
     }
 
-    // Chama o service sem passar companyId
+    // companyId pode ser enviado no body (opcional)
     return await this.ticketService.createTicketForClient(
       dto,
       userDb.id,
+      dto.companyId,
     );
   }
   
