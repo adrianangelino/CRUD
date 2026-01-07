@@ -52,13 +52,13 @@ export class TicketController {
       throw new Error('Usuário não encontrado');
     }
 
-    return await this.ticketService.createTicket(
+    // Chama o service sem passar companyId
+    return await this.ticketService.createTicketForClient(
       dto,
       userDb.id,
-      null,
     );
   }
-
+  
   @UseGuards(AuthGuard('jwt'))
   @Post('/check-ticket')
   async checkTicket(@Body() dto: CheckTicketDto): Promise<Ticket> {
