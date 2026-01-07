@@ -183,6 +183,15 @@ export class TicketService {
     });
   }
 
+  async GetTicketUserForId(userId: number): Promise<Ticket[]> {
+    return await this.prisma.ticket.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+    });
+  }
+
   async softDeleted(id: number): Promise<Ticket> {
     const existingTicket = await this.prisma.ticket.findUnique({
       where: { id },

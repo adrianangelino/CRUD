@@ -20,7 +20,7 @@ export class EventsService {
         endDate: dto.endDate,
         deletedAt: dto.deletedAt,
         ticketTypeId: dto.ticketTypeId,
-        companyId: dto.companyId, 
+        companyId: dto.companyId,
       },
     });
   }
@@ -61,6 +61,12 @@ export class EventsService {
     }
 
     return validEvents;
+  }
+
+  async getAllEventsForClients(): Promise<Events[]> {
+    return this.prisma.events.findMany({
+      where: { deletedAt: null },
+    });
   }
 
   async updateEvent(id: number, dto: updateEventDto): Promise<Events> {

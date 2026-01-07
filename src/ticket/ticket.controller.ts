@@ -7,6 +7,8 @@ import {
   Delete,
   Query,
   Request,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -15,10 +17,14 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CheckTicketDto } from './dto/check-tickt.dto';
 import { getTicketUser } from './dto/get-ticket-user';
+import { UserService } from '../user/user.service';
 
 @Controller('ticket')
 export class TicketController {
-  constructor(private readonly ticketService: TicketService) {}
+  constructor(
+    private readonly ticketService: TicketService,
+    private readonly userService: UserService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/create-ticket')
@@ -29,12 +35,13 @@ export class TicketController {
     if (!userDb) {
       throw new Error('Usuário não encontrado');
     }
+    if (userDb.companyId == null) {
+      throw new Error('Usuário não pertence a nenhuma empresa');
+    }
     return await this.ticketService.createTicket(
       dto,
       userDb.id,
-      (userDb.companyId != null)
-        ? userDb.companyId
-        : (() => { throw new Error('Usuário não pertence a nenhuma empresa'); })(),
+      userDb.companyId,
     );
   }
 
@@ -48,6 +55,25 @@ export class TicketController {
   @Get('/getTicketUserName/')
   async getTicketUser(@Query() dto: getTicketUser): Promise<Ticket> {
     return await this.ticketService.getTicketUser(dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/GetTicketUserForId/:userId')
+  async GetTicketUserForId(
+    @Request() req,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Ticket[]> {
+    const userDb = await this.userService.buscarUsuarioPorEmail(req.user.email);
+
+    if (!userDb) {
+      throw new BadRequestException('usuário inexistente');
+    }
+
+    if (userDb.roleId !== 2) {
+      throw new BadRequestException('Este usuário não é cliente');
+    }
+
+    return await this.ticketService.GetTicketUserForId(userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
