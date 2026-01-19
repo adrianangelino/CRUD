@@ -17,7 +17,8 @@ export class CompanyService {
   async getCompanySummaryByUserEmail(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) throw new BadRequestException('Usuário não encontrado');
-    if (user.companyId == null) throw new BadRequestException('Usuário não pertence a nenhuma empresa');
+    if (user.companyId == null)
+      throw new BadRequestException('Usuário não pertence a nenhuma empresa');
 
     // Busca tickets válidos da company
     const validTickets = await this.prisma.ticket.findMany({
@@ -33,7 +34,10 @@ export class CompanyService {
     const company = await this.prisma.company.findUnique({
       where: { id: user.companyId },
     });
-    if (!company) throw new BadRequestException('Empresa não encontrada');
+
+    if (!company) {
+      throw new BadRequestException('Empresa não encontrada');
+    }
 
     const totalEvents = validEvents.length;
     const totalTickets = validTickets.length;
@@ -44,47 +48,54 @@ export class CompanyService {
     });
 
     // Para cada evento, sumariza por ticketType
-    const eventSummaries = await Promise.all(events.map(async (event) => {
-      // Busca todos os ticketTypes do evento
-      const ticketTypes = await this.prisma.ticketType.findMany({
-        where: { id: event.ticketTypeId, deletedAt: null },
-      });
-      // Para cada ticketType, calcula limite, vendidos e total
-      const ticketTypeSummaries = await Promise.all(ticketTypes.map(async (tt) => {
-        // Limite de ingressos para esse tipo
-        const limit = tt.quantity;
-        if (user.companyId == null) throw new BadRequestException('Usuário não pertence a nenhuma empresa');
-        const sold = await this.prisma.ticket.count({
-          where: {
-            eventId: event.id,
-            ticketTypeId: tt.id,
-            companyId: user.companyId!,
-            deletedAt: null,
-          },
+    const eventSummaries = await Promise.all(
+      events.map(async (event) => {
+        // Busca todos os ticketTypes do evento
+        const ticketTypes = await this.prisma.ticketType.findMany({
+          where: { id: event.ticketTypeId, deletedAt: null },
         });
-        // Total arrecadado
-        const total = sold * tt.price;
-        return {
-          ticketTypeId: tt.id,
-          ticketTypeName: tt.name,
-          price: tt.price,
-          limit,
-          sold,
-          total,
-        };
-      }));
+        // Para cada ticketType, calcula limite, vendidos e total
+        const ticketTypeSummaries = await Promise.all(
+          ticketTypes.map(async (tt) => {
+            // Limite de ingressos para esse tipo
+            const limit = tt.quantity;
+            if (user.companyId == null)
+              throw new BadRequestException(
+                'Usuário não pertence a nenhuma empresa',
+              );
+            const sold = await this.prisma.ticket.count({
+              where: {
+                eventId: event.id,
+                ticketTypeId: tt.id,
+                companyId: user.companyId!,
+                deletedAt: null,
+              },
+            });
+            // Total arrecadado
+            const total = sold * tt.price;
+            return {
+              ticketTypeId: tt.id,
+              ticketTypeName: tt.name,
+              price: tt.price,
+              limit,
+              sold,
+              total,
+            };
+          }),
+        );
         return {
           eventId: event.id,
           eventName: event.name,
           ticketTypes: ticketTypeSummaries,
         };
-      }));
+      }),
+    );
 
-      return {
-        ...company,
-        totalEvents,
-        totalTickets,
-        events: eventSummaries,
-      };
+    return {
+      ...company,
+      totalEvents,
+      totalTickets,
+      events: eventSummaries,
+    };
   }
 }
